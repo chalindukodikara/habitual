@@ -1,0 +1,423 @@
+openapi: 3.0.3
+info:
+  title: Habitual API
+  description: REST API for the Habitual habit tracking application
+  version: 1.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /api/profiles:
+    post:
+      summary: Create a new profile
+      operationId: createProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProfileRequest"
+      responses:
+        "201":
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/profiles/{profileId}:
+    get:
+      summary: Get a profile by ID
+      operationId: getProfile
+      parameters:
+        - $ref: "#/components/parameters/profileId"
+      responses:
+        "200":
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/profiles/{profileId}/habits:
+    get:
+      summary: List all habits for a profile
+      operationId: listHabits
+      parameters:
+        - $ref: "#/components/parameters/profileId"
+      responses:
+        "200":
+          description: List of habits with streak data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Habit"
+    post:
+      summary: Create a new habit
+      operationId: createHabit
+      parameters:
+        - $ref: "#/components/parameters/profileId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHabitRequest"
+      responses:
+        "201":
+          description: Habit created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/profiles/{profileId}/today:
+    get:
+      summary: Get today's completions
+      operationId: getTodayCompletions
+      description: Returns a map of habitId to boolean for all habits completed today
+      parameters:
+        - $ref: "#/components/parameters/profileId"
+      responses:
+        "200":
+          description: Today's completions
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: boolean
+                example:
+                  aaaa1111-1111-4111-8111-111111111111: true
+                  aaaa2222-2222-4222-8222-222222222222: true
+
+  /api/profiles/{profileId}/heatmap:
+    get:
+      summary: Get heatmap data
+      operationId: getHeatmap
+      description: Returns daily completion counts over the specified number of months
+      parameters:
+        - $ref: "#/components/parameters/profileId"
+        - name: months
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 24
+            default: 12
+          description: Number of months of history to return
+      responses:
+        "200":
+          description: Heatmap entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HeatmapEntry"
+
+  /api/profiles/{profileId}/stats:
+    get:
+      summary: Get statistics
+      operationId: getStats
+      description: Returns weekly completion rates and per-habit 30-day performance
+      parameters:
+        - $ref: "#/components/parameters/profileId"
+      responses:
+        "200":
+          description: Statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsResponse"
+
+  /api/habits/{habitId}:
+    patch:
+      summary: Update a habit
+      operationId: updateHabit
+      parameters:
+        - $ref: "#/components/parameters/habitId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateHabitRequest"
+      responses:
+        "200":
+          description: Habit updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: Delete a habit
+      operationId: deleteHabit
+      parameters:
+        - $ref: "#/components/parameters/habitId"
+      responses:
+        "204":
+          description: Habit deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/habits/{habitId}/complete:
+    post:
+      summary: Toggle habit completion
+      operationId: toggleCompletion
+      description: If the habit is completed for the given date, removes the completion. Otherwise, creates it.
+      parameters:
+        - $ref: "#/components/parameters/habitId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteRequest"
+      responses:
+        "200":
+          description: Completion toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Completion"
+
+components:
+  parameters:
+    profileId:
+      name: profileId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    habitId:
+      name: habitId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        timezone:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, displayName, timezone, createdAt]
+
+    CreateProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        timezone:
+          type: string
+      required: [displayName]
+
+    Habit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        profileId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+          description: Hex color code
+        frequency:
+          type: string
+          enum: [daily, weekdays, weekend]
+        archived:
+          type: boolean
+        currentStreak:
+          type: integer
+          description: Consecutive days completed (from streaks table)
+        longestStreak:
+          type: integer
+        rate30d:
+          type: number
+          format: double
+          description: Completion rate over last 30 days (0-100)
+      required: [id, profileId, name, icon, color, frequency, archived]
+
+    CreateHabitRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+          default: "✅"
+        color:
+          type: string
+          default: "#4CAF50"
+        frequency:
+          type: string
+          enum: [daily, weekdays, weekend]
+          default: daily
+      required: [name]
+
+    UpdateHabitRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, weekdays, weekend]
+        archived:
+          type: boolean
+
+    CompleteRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: "YYYY-MM-DD, defaults to today"
+
+    Completion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        habitId:
+          type: string
+          format: uuid
+        completedDate:
+          type: string
+          format: date
+        toggled:
+          type: string
+          enum: [completed, uncompleted]
+      required: [id, habitId, completedDate, toggled]
+
+    HeatmapEntry:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        count:
+          type: integer
+      required: [date, count]
+
+    StatsResponse:
+      type: object
+      properties:
+        weeklyStats:
+          type: array
+          items:
+            $ref: "#/components/schemas/WeeklyStat"
+        habitRates:
+          type: array
+          items:
+            $ref: "#/components/schemas/HabitRate"
+      required: [weeklyStats, habitRates]
+
+    WeeklyStat:
+      type: object
+      properties:
+        weekStart:
+          type: string
+          format: date
+        completionRate:
+          type: number
+          format: double
+      required: [weekStart, completionRate]
+
+    HabitRate:
+      type: object
+      properties:
+        habitName:
+          type: string
+        rate30d:
+          type: number
+          format: double
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        color:
+          type: string
+        icon:
+          type: string
+      required: [habitName, rate30d, currentStreak, longestStreak, color, icon]

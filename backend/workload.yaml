@@ -7,7 +7,7 @@ endpoints:
   - name: http
     port: 8080
     type: HTTP
-    schemaFile: ../openapi.yaml
+    schemaFile: openapi.yaml
     visibility:
       - project
 
