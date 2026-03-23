@@ -1,0 +1,25 @@
+apiVersion: openchoreo.dev/v1alpha1
+
+metadata:
+  name: streak-engine
+
+dependencies:
+  endpoints:
+    - component: habitual-db
+      name: tcp
+      visibility: project
+      envBindings:
+        host: DB_HOST
+        port: DB_PORT
+
+configurations:
+  env:
+    - name: DB_NAME
+      value: habitualdb
+    - name: DB_USER
+      value: appuser
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: habitual-db-credentials
+          key: password
