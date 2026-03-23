@@ -1,0 +1,20 @@
+apiVersion: openchoreo.dev/v1alpha1
+
+metadata:
+  name: habitual-db
+
+endpoints:
+  - name: tcp
+    port: 5432
+    type: TCP
+    visibility:
+      - project
+
+configurations:
+  env:
+    - name: POSTGRES_DB
+      value: habitualdb
+    - name: POSTGRES_USER
+      value: appuser
+    - name: POSTGRES_PASSWORD
+      value: apppass

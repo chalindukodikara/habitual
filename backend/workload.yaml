@@ -29,7 +29,4 @@ configurations:
     - name: DB_USER
       value: appuser
     - name: DB_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: habitual-db-credentials
-          key: password
+      value: apppass
