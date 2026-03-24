@@ -1,0 +1,17 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: backend
+  namespace: default
+spec:
+  owner:
+    projectName: habitual
+
+  componentType:
+    name: deployment/service
+    kind: ComponentType
+
+  autoDeploy: true
+
+  parameters:
+    port: 8080

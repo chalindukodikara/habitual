@@ -1,0 +1,36 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: backend
+  namespace: default
+spec:
+  owner:
+    componentName: backend
+    projectName: habitual
+  container:
+    image: ghcr.io/openchoreo/demo/habitual-backend:latest
+    env:
+      - key: PORT
+        value: "8080"
+      - key: DB_NAME
+        value: "habitualdb"
+      - key: DB_USER
+        value: "appuser"
+      - key: DB_PASSWORD
+        value: "apppass"
+  endpoints:
+    http:
+      type: HTTP
+      port: 8080
+      visibility: [project]
+      schema:
+        type: openapi
+        content: openapi.yaml
+  dependencies:
+    endpoints:
+      - component: postgres
+        name: tcp
+        visibility: project
+        envBindings:
+          host: DB_HOST
+          port: DB_PORT

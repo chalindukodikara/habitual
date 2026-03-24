@@ -1,0 +1,26 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: cronjob
+  namespace: default
+spec:
+  owner:
+    componentName: cronjob
+    projectName: habitual
+  container:
+    image: ghcr.io/openchoreo/demo/habitual-cronjob:latest
+    env:
+      - key: DB_NAME
+        value: "habitualdb"
+      - key: DB_USER
+        value: "appuser"
+      - key: DB_PASSWORD
+        value: "apppass"
+  dependencies:
+    endpoints:
+      - component: postgres
+        name: tcp
+        visibility: project
+        envBindings:
+          host: DB_HOST
+          port: DB_PORT

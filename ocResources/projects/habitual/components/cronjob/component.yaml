@@ -1,0 +1,17 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: cronjob
+  namespace: default
+spec:
+  owner:
+    projectName: habitual
+
+  componentType:
+    name: cronjob/scheduled-task
+    kind: ClusterComponentType
+
+  autoDeploy: true
+
+  parameters:
+    schedule: "5 0 * * *"

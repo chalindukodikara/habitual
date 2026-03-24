@@ -1,0 +1,13 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Project
+metadata:
+  name: habitual
+  namespace: default
+  annotations:
+    openchoreo.dev/display-name: Habitual
+    openchoreo.dev/description: Build better habits, one day at a time
+  labels:
+    openchoreo.dev/name: habitual
+spec:
+  deploymentPipelineRef:
+    name: default

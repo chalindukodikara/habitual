@@ -1,0 +1,22 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: postgres
+  namespace: default
+spec:
+  owner:
+    componentName: postgres
+    projectName: habitual
+  container:
+    image: postgres:16-alpine
+    env:
+      - key: POSTGRES_DB
+        value: "habitualdb"
+      - key: POSTGRES_USER
+        value: "appuser"
+      - key: POSTGRES_PASSWORD
+        value: "apppass"
+  endpoints:
+    tcp:
+      type: TCP
+      port: 5432

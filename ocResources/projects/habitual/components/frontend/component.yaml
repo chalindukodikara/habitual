@@ -1,0 +1,14 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Component
+metadata:
+  name: frontend
+  namespace: default
+spec:
+  owner:
+    projectName: habitual
+
+  componentType:
+    name: deployment/web-application
+    kind: ComponentType
+
+  autoDeploy: true

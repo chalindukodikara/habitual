@@ -1,0 +1,25 @@
+apiVersion: openchoreo.dev/v1alpha1
+kind: Workload
+metadata:
+  name: frontend
+  namespace: default
+spec:
+  owner:
+    componentName: frontend
+    projectName: habitual
+  container:
+    image: ghcr.io/openchoreo/demo/habitual-frontend:latest
+  endpoints:
+    http:
+      type: HTTP
+      port: 3000
+      visibility: [external]
+  dependencies:
+    endpoints:
+      - component: backend
+        name: http
+        visibility: project
+        envBindings:
+          address: API_URL
+          host: API_HOST
+          port: API_PORT
