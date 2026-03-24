@@ -160,6 +160,19 @@ kubectl apply -f ocResources/projects/habitual/components/cronjob/
 
 Or create components via the OpenChoreo UI — each source directory contains a `workload.yaml` descriptor that OpenChoreo reads during the build workflow.
 
+### Cleanup
+
+```bash
+# Delete components and project (reverse order)
+kubectl delete workload cronjob frontend backend postgres -n default
+kubectl delete component cronjob frontend backend postgres -n default
+kubectl delete project habitual -n default
+
+# Delete platform resources (optional, shared across projects)
+kubectl delete clustercomponenttype database
+kubectl delete clustertrait persistent-volume
+```
+
 ## API Endpoints
 
 | Method | Path                          | Description                         |

@@ -11,6 +11,8 @@ spec:
     name: deployment/database
     kind: ClusterComponentType
 
+  autoDeploy: true
+
   parameters:
     port: 5432
 
