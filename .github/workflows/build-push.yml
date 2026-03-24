@@ -3,13 +3,18 @@ name: Build and Push Images
 on:
   push:
     branches: [main]
-    paths:
-      - "demo/habitual/**"
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 env:
-  DOCKER_NAMESPACE: chalindukodikara
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/habitual
   TAG: latest
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   build-frontend:
@@ -18,18 +23,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
-          context: demo/habitual/frontend
-          push: true
-          tags: ${{ env.DOCKER_NAMESPACE }}/habitual-frontend:${{ env.TAG }}
+          context: frontend
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE_PREFIX }}-frontend:${{ env.TAG }}
 
   build-backend:
     name: Build & Push Backend
@@ -37,18 +43,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
-          context: demo/habitual/backend
-          push: true
-          tags: ${{ env.DOCKER_NAMESPACE }}/habitual-backend:${{ env.TAG }}
+          context: backend
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE_PREFIX }}-backend:${{ env.TAG }}
 
   build-cronjob:
     name: Build & Push Cronjob
@@ -56,15 +63,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push cronjob
         uses: docker/build-push-action@v6
         with:
-          context: demo/habitual/cronjob
-          push: true
-          tags: ${{ env.DOCKER_NAMESPACE }}/habitual-cronjob:${{ env.TAG }}
+          context: cronjob
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE_PREFIX }}-cronjob:${{ env.TAG }}
+
+  build-postgres:
+    name: Build & Push Postgres
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push postgres
+        uses: docker/build-push-action@v6
+        with:
+          context: postgres
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE_PREFIX }}-postgres:${{ env.TAG }}
