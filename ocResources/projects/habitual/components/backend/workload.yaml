@@ -8,7 +8,7 @@ spec:
     componentName: backend
     projectName: habitual
   container:
-    image: ghcr.io/openchoreo/demo/habitual-backend:latest
+    image: ghcr.io/chalindukodikara/habitual-backend:latest
     env:
       - key: PORT
         value: "8080"

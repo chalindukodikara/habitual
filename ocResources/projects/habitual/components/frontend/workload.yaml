@@ -8,7 +8,7 @@ spec:
     componentName: frontend
     projectName: habitual
   container:
-    image: ghcr.io/openchoreo/demo/habitual-frontend:latest
+    image: ghcr.io/chalindukodikara/habitual-frontend:latest
   endpoints:
     http:
       type: HTTP

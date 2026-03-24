@@ -8,7 +8,7 @@ spec:
     componentName: cronjob
     projectName: habitual
   container:
-    image: ghcr.io/openchoreo/demo/habitual-cronjob:latest
+    image: ghcr.io/chalindukodikara/habitual-cronjob:latest
     env:
       - key: DB_NAME
         value: "habitualdb"
