@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"strconv"
@@ -17,6 +18,7 @@ import (
 )
 
 // ConnectDB creates a connection pool to the PostgreSQL database.
+// It retries the connection up to 30 times with a 2-second delay between attempts.
 func ConnectDB(ctx context.Context) (*pgxpool.Pool, error) {
 	host := getEnv("DB_HOST", "localhost")
 	port := getEnv("DB_PORT", "5432")
@@ -27,17 +29,26 @@ func ConnectDB(ctx context.Context) (*pgxpool.Pool, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		url.QueryEscape(user), url.QueryEscape(password), host, port, dbName)
 
-	pool, err := pgxpool.New(ctx, dsn)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create connection pool: %w", err)
+	maxRetries := 30
+	for i := range maxRetries {
+		pool, err := pgxpool.New(ctx, dsn)
+		if err != nil {
+			log.Printf("Attempt %d/%d: failed to create connection pool: %v", i+1, maxRetries, err)
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		if err := pool.Ping(ctx); err != nil {
+			pool.Close()
+			log.Printf("Attempt %d/%d: waiting for database... %v", i+1, maxRetries, err)
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		return pool, nil
 	}
 
-	if err := pool.Ping(ctx); err != nil {
-		pool.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
-	}
-
-	return pool, nil
+	return nil, fmt.Errorf("failed to connect to database after %d attempts", maxRetries)
 }
 
 // CreateProfile inserts a new profile into the database.

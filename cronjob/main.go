@@ -185,15 +185,23 @@ func connectDB(ctx context.Context) (*pgxpool.Pool, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		url.QueryEscape(user), url.QueryEscape(password), host, port, dbName)
 
-	pool, err := pgxpool.New(ctx, dsn)
-	if err != nil {
-		return nil, err
+	maxRetries := 10
+	for i := range maxRetries {
+		pool, err := pgxpool.New(ctx, dsn)
+		if err != nil {
+			log.Printf("Attempt %d/%d: %v", i+1, maxRetries, err)
+			time.Sleep(2 * time.Second)
+			continue
+		}
+		if err := pool.Ping(ctx); err != nil {
+			pool.Close()
+			log.Printf("Attempt %d/%d: waiting for database... %v", i+1, maxRetries, err)
+			time.Sleep(2 * time.Second)
+			continue
+		}
+		return pool, nil
 	}
-	if err := pool.Ping(ctx); err != nil {
-		pool.Close()
-		return nil, err
-	}
-	return pool, nil
+	return nil, fmt.Errorf("failed to connect to database after %d attempts", maxRetries)
 }
 
 func getEnv(key, fallback string) string {
