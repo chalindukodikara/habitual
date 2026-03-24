@@ -2,7 +2,9 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import WeeklyChart from "../components/WeeklyChart";
 import Sparkline from "../components/Sparkline";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+import { getConfig } from "../config";
+
+const API_URL = getConfig().apiUrl;
 const DEFAULT_PROFILE_ID = "11111111-1111-4111-8111-111111111111";
 
 interface WeeklyStat {
