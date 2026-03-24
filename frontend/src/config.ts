@@ -18,14 +18,14 @@ export async function loadConfig(): Promise<AppConfig> {
     // Fall back to defaults below.
   }
   cachedConfig = {
-    apiUrl: "/api/backend",
+    apiUrl: "",
   };
   return cachedConfig;
 }
 
 export function getConfig(): AppConfig {
   if (!cachedConfig) {
-    return { apiUrl: "/api/backend" };
+    return { apiUrl: "" };
   }
   return cachedConfig;
 }

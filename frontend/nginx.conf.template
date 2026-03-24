@@ -9,7 +9,7 @@ server {
     try_files $uri $uri/ /index.html;
   }
 
-  location /api/backend/ {
-    proxy_pass ${API_URL}/;
+  location /api/ {
+    proxy_pass ${API_URL}/api/;
   }
 }
