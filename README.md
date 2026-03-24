@@ -8,28 +8,28 @@ A full-featured habit tracker with a GitHub-style contribution heatmap, streak t
 
 ```
                     ┌─────────────────┐
-                    │    Browser       │
+                    │    Browser      │
                     └────────┬────────┘
                              │
                     ┌────────▼────────┐
-                    │    frontend      │  React + Vite, served by nginx
-                    │    port 3000     │  nginx proxies /api/backend/ → backend
+                    │    frontend     │  React + Vite, served by nginx
+                    │    port 3000    │  nginx proxies /api/backend/ → backend
                     └────────┬────────┘
                              │ (in-cluster)
                     ┌────────▼────────┐
-                    │    backend       │  Go REST API (net/http)
-                    │    port 8080     │  CRUD for habits, completions, stats
+                    │    backend      │  Go REST API (net/http)
+                    │    port 8080    │  CRUD for habits, completions, stats
                     └────────┬────────┘
                              │
                     ┌────────▼────────┐
-          ┌────────│    postgres      │  PostgreSQL 16
-          │        │    port 5432     │  Persistent storage via trait
-          │        └──────────────────┘
-          │
- ┌────────▼────────┐
- │    cronjob       │  Runs daily at 00:05 UTC
- │    (scheduled)   │  Computes streaks & weekly stats
- └──────────────────┘
+           ┌────────│    postgres     │  PostgreSQL 16
+           │        │    port 5432    │  Persistent storage via trait
+           │        └─────────────────┘
+           │
+  ┌────────▼────────-┐
+  │    cronjob       │  Runs daily at 00:05 UTC
+  │    (scheduled)   │  Computes streaks & weekly stats
+  └──────────────────┘
 ```
 
 ### Components
@@ -114,19 +114,44 @@ FRONTEND_PORT=3002 BACKEND_PORT=8082 PG_PORT=5434 \
 
 ## Deploy to OpenChoreo
 
-### Prerequisites
-
-Platform resources (component types and traits) must be applied first:
+### Quick deploy (no clone needed)
 
 ```bash
-kubectl apply -f ocResources/platform/traits/persistent-volume.yaml
-kubectl apply -f ocResources/platform/component-types/
+# 1. Platform resources (cluster-scoped, one-time setup)
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/platform/traits/persistent-volume.yaml
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/platform/component-types/database.yaml
+
+# 2. Project
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/project.yaml
+
+# 3. Postgres
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/components/postgres/component.yaml
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/components/postgres/workload.yaml
+
+# 4. Backend
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/components/backend/component.yaml
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/components/backend/workload.yaml
+
+# 5. Frontend
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/components/frontend/component.yaml
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/components/frontend/workload.yaml
+
+# 6. Cronjob
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/components/cronjob/component.yaml
+kubectl apply -f https://raw.githubusercontent.com/chalindukodikara/habitual/refs/heads/main/ocResources/projects/habitual/components/cronjob/workload.yaml
 ```
 
-### Deploy components
+### From a local clone
 
 ```bash
+# 1. Platform resources
+kubectl apply -f ocResources/platform/traits/persistent-volume.yaml
+kubectl apply -f ocResources/platform/component-types/
+
+# 2. Project
 kubectl apply -f ocResources/projects/habitual/project.yaml
+
+# 3. Components
 kubectl apply -f ocResources/projects/habitual/components/postgres/
 kubectl apply -f ocResources/projects/habitual/components/backend/
 kubectl apply -f ocResources/projects/habitual/components/frontend/
