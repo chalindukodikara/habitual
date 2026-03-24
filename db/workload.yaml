@@ -1,7 +1,7 @@
 apiVersion: openchoreo.dev/v1alpha1
 
 metadata:
-  name: habitual-db
+  name: postgres
 
 endpoints:
   - name: tcp

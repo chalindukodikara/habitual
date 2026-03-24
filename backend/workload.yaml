@@ -1,7 +1,7 @@
 apiVersion: openchoreo.dev/v1alpha1
 
 metadata:
-  name: habitual-api
+  name: backend
 
 endpoints:
   - name: http
@@ -13,7 +13,7 @@ endpoints:
 
 dependencies:
   endpoints:
-    - component: habitual-db
+    - component: postgres
       name: tcp
       visibility: project
       envBindings:

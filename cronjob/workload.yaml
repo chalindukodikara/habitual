@@ -1,11 +1,11 @@
 apiVersion: openchoreo.dev/v1alpha1
 
 metadata:
-  name: streak-engine
+  name: cronjob
 
 dependencies:
   endpoints:
-    - component: habitual-db
+    - component: postgres
       name: tcp
       visibility: project
       envBindings:
