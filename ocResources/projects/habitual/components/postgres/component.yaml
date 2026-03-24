@@ -9,14 +9,14 @@ spec:
 
   componentType:
     name: deployment/database
-    kind: ComponentType
+    kind: ClusterComponentType
 
   parameters:
     port: 5432
 
   traits:
     - name: persistent-volume
-      kind: Trait
+      kind: ClusterTrait
       instanceName: data-storage
       parameters:
         volumeName: pg-data

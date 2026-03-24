@@ -6,11 +6,9 @@
 ocResources/
 ├── platform/                          # Platform Engineer resources
 │   ├── component-types/
-│   │   ├── database.yaml              # TCP database (custom)
-│   │   ├── service.yaml               # HTTP services
-│   │   └── web-application.yaml       # Web frontends
+│   │   └── database.yaml              # ClusterComponentType: TCP database
 │   └── traits/
-│       └── persistent-volume.yaml     # Persistent storage
+│       └── persistent-volume.yaml     # ClusterTrait: persistent storage
 └── projects/
     └── habitual/
         ├── project.yaml
@@ -29,30 +27,32 @@ ocResources/
                 └── workload.yaml
 ```
 
-## Component Types
+## ClusterComponentTypes
 
-### Namespace-scoped (custom, under `platform/component-types/`)
+### Built-in (no yaml needed)
 
 | Name | Workload Type | Use Case |
 |------|--------------|----------|
 | `deployment/service` | Deployment | HTTP/gRPC services with endpoints and HTTPRoute |
 | `deployment/web-application` | Deployment | Web frontends with external HTTPRoute |
-| `deployment/database` | Deployment | TCP-only service with persistent-volume trait |
+| `cronjob/scheduled-task` | CronJob | Periodic scheduled jobs |
 
-### Cluster-scoped (built-in, no yaml needed)
+### Custom (under `platform/component-types/`)
 
 | Name | Workload Type | Use Case |
 |------|--------------|----------|
-| `cronjob/scheduled-task` | CronJob | Periodic scheduled jobs |
+| `deployment/database` | Deployment | TCP-only service with persistent-volume trait |
 
-The `database` ComponentType differs from `service` by:
+The `database` ClusterComponentType differs from `service` by:
 - Exposes a **TCP port** (not HTTP) via ClusterIP Service
 - No HTTPRoute generation
-- Allows the `persistent-volume` trait for durable storage
+- Allows the `persistent-volume` ClusterTrait for durable storage
 
-## Traits
+## ClusterTraits
 
-### `persistent-volume` (namespace-scoped)
+### Custom (under `platform/traits/`)
+
+### `persistent-volume`
 
 Attaches persistent storage to a component. Creates a PVC and patches the Deployment with volume/volumeMount.
 
@@ -64,7 +64,7 @@ Attaches persistent storage to a component. Creates a PVC and patches the Deploy
 Platform resources must exist before components reference them:
 
 ```bash
-# 1. Platform resources
+# 1. Platform resources (cluster-scoped)
 kubectl apply -f ocResources/platform/traits/persistent-volume.yaml
 kubectl apply -f ocResources/platform/component-types/
 

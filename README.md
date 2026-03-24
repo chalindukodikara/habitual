@@ -66,7 +66,7 @@ habitual/
 │   ├── Dockerfile
 │   ├── openapi.yaml
 │   └── workload.yaml       # Descriptor: HTTP endpoint, depends on postgres
-├── db/                     # PostgreSQL setup
+├── postgres/                     # PostgreSQL setup
 │   ├── init.sql            # Schema: profiles, habits, completions, streaks, weekly_stats
 │   ├── seed.sql            # 6 months of demo data for 8 habits
 │   ├── Dockerfile          # postgres:16-alpine + init/seed scripts

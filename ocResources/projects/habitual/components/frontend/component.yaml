@@ -9,6 +9,6 @@ spec:
 
   componentType:
     name: deployment/web-application
-    kind: ComponentType
+    kind: ClusterComponentType
 
   autoDeploy: true
